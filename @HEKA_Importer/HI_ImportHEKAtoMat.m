@@ -140,8 +140,9 @@ addEPS = @(x) x+randn(size(x))*eps;
 matData2 = cell(numel(grp_row),1);
 dataRaw = cell(numel(grp_row),1);
 
+apply_zero_adjustments = obj.opt.DataAlreadyZeroed == 0;
 for iGr = 1:numel(grp_row)
-	matData2{iGr}=LocalImportGroup(fh, obj.trees.dataTree, iGr, grp_row);
+	matData2{iGr}=LocalImportGroup(fh, obj.trees.dataTree, iGr, grp_row, apply_zero_adjustments);
 	
 	for iSer = 1:numel(matData2{iGr})
 		dataRaw{iGr,:}{iSer,:} = cellfun(addEPS,matData2{iGr}{iSer},'UniformOutput',false);
@@ -241,7 +242,10 @@ end
 
 
 %--------------------------------------------------------------------------
-function matData2=LocalImportGroup(fh, dataTree, grp, grp_row)
+function matData2=LocalImportGroup(fh, dataTree, grp, grp_row, apply_zero_adjustments)
+if ~exist('apply_zero_adjustments', 'var')
+    apply_zero_adjustments = 0; 
+end 
 %--------------------------------------------------------------------------
 % Create a structure for the series headers
 
@@ -324,7 +328,8 @@ for ser=1:nseries
 		% Now scale the data to real world units
 		% Note we also apply zero adjustment
 		for col=1:size(data,2)
-			data(:,col)=data(:,col)*tr_s(col).TrDataScaler+tr_s(col).TrZeroData;
+			data(:,col)=data(:,col)*tr_s(col).TrDataScaler+ ...
+                apply_zero_adjustments*tr_s(col).TrZeroData;
 		end
 		
 		matData2{ser,:}{k} = data;

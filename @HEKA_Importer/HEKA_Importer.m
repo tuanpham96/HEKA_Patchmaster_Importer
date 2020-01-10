@@ -100,8 +100,13 @@ classdef HEKA_Importer < handle
 		function obj = HEKA_Importer(filepath,varargin) %CONSTRUCTOR
 			
 			P = inputParser;
-			P.addRequired('filepath',@ischar)
+			P.addRequired('filepath',@ischar); 
+            
+            % assumed data already zero-adjusted
+            P.addOptional('DataAlreadyZeroed',1);
+            
 			P.parse(filepath,varargin{:});
+            
 			obj.opt = P.Results;
 			
 			obj.HI_loadHEKAFile;
